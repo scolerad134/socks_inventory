@@ -1,7 +1,10 @@
 package com.socks.service.impl;
 
+import com.socks.exception.ErrorProcessingFileException;
+import com.socks.exception.IncorrectDataFormatException;
+import com.socks.exception.InsufficientSocksQuantityException;
+import com.socks.exception.NoSuchSocksException;
 import com.socks.util.parser.FileParser;
-import com.socks.util.exception.InsufficientSocksQuantityException;
 import com.socks.model.Socks;
 import com.socks.repository.SocksRepository;
 import com.socks.service.SocksService;
@@ -59,7 +62,7 @@ public class SocksServiceImpl implements SocksService {
             Socks existSocks = socksOptional.orElse(null);
 
             if (existSocks.getQuantity() < socks.getQuantity()) {
-                throw new InsufficientSocksQuantityException("Insufficient quantity of socks to delete");
+                throw new InsufficientSocksQuantityException("Нехватка носков на складе");
             }
 
             existSocks.setQuantity(existSocks.getQuantity() - socks.getQuantity());
@@ -69,9 +72,7 @@ public class SocksServiceImpl implements SocksService {
             return true;
         }
 
-        log.debug("deleteSocks - end, socks = {}", socks);
-
-        return false;
+        throw new NoSuchSocksException("Нет носков такого цвета и с таким процентным содержанием хлопка");
 
     }
 
@@ -134,13 +135,16 @@ public class SocksServiceImpl implements SocksService {
             } else if ("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet".equals(contentType)) {
                 socksList = fileParser.parseExcelFile(file);
             } else {
-                throw new IllegalArgumentException("Unsupported file format: " + contentType);
+                throw new IncorrectDataFormatException("Некорректный формат данных: " + contentType);
             }
 
             socksRepository.saveAll(socksList);
 
+        } catch (IncorrectDataFormatException e) {
+            throw e;
         } catch (Exception e) {
-            throw new RuntimeException("Failed to process the file: " + file.getOriginalFilename(), e);
+            throw new ErrorProcessingFileException("Ошибка при обработке файла: " + file.getOriginalFilename(), e);
         }
     }
+
 }

@@ -1,9 +1,10 @@
 package com.socks.service;
 
+import com.socks.exception.IncorrectDataFormatException;
+import com.socks.exception.InsufficientSocksQuantityException;
 import com.socks.model.Socks;
 import com.socks.repository.SocksRepository;
 import com.socks.service.impl.SocksServiceImpl;
-import com.socks.util.exception.InsufficientSocksQuantityException;
 import com.socks.util.parser.FileParser;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -153,7 +154,7 @@ class SocksServiceTest {
         MultipartFile file = mock(MultipartFile.class);
         when(file.getContentType()).thenReturn("application/pdf");
 
-        assertThrows(RuntimeException.class, () -> socksService.uploadSocksBatch(file));
+        assertThrows(IncorrectDataFormatException.class, () -> socksService.uploadSocksBatch(file));
         verify(fileParser, never()).parseCsvFile(any());
         verify(fileParser, never()).parseExcelFile(any());
         verify(socksRepository, never()).saveAll(any());
