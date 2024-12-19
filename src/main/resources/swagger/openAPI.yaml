@@ -1,0 +1,166 @@
+openapi: 3.0.1
+info:
+  title: Socks Inventory API
+  description: API для управления учётом носков на складе
+  version: 1.0.0
+paths:
+  /api/socks/income:
+    post:
+      summary: Добавить партию носков
+      description: Добавляет новую партию носков на склад с переданными данными.
+      operationId: addSocksIncome
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SocksRequestDto'
+      responses:
+        '200':
+          description: Партия носков успешно добавлена.
+          content:
+            text/plain:
+              schema:
+                $ref: '#/components/schemas/SocksResponseDto'
+  /api/socks/outcome:
+    post:
+      summary: Списать партию носков
+      description: Списывает партию носков со склада, если их хватает.
+      operationId: removeSocksOutcome
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SocksRequestDto'
+      responses:
+        '200':
+          description: Партия носков успешно списана.
+          content:
+            text/plain:
+              schema:
+                type: string
+  /api/socks:
+    get:
+      summary: Получить количество носков
+      description: Возвращает общее количество носков на складе с фильтрацией.
+      operationId: getSocksQuantity
+      parameters:
+        - name: color
+          in: query
+          description: Цвет носков.
+          required: true
+          schema:
+            type: string
+            example: red
+        - name: cottonPartComparison
+          in: query
+          description: Процент хлопка носков (оператор сравнения equal, moreThan, lessThan).
+          required: true
+          schema:
+            type: string
+            example: equal
+        - name: cottonPart
+          in: query
+          description: Значение процента хлопка.
+          required: true
+          schema:
+            type: number
+            format: double
+            example: 50
+      responses:
+        '200':
+          description: Общее количество носков, соответствующих фильтрам.
+          content:
+            application/json:
+              schema:
+                type: integer
+  /api/socks/{id}:
+    put:
+      summary: Обновить данные носков
+      description: Позволяет изменить параметры носков (цвет, процент хлопка, количество).
+      operationId: updateSocks
+      parameters:
+        - name: id
+          in: path
+          description: Идентификатор записи носков, которую нужно обновить.
+          required: true
+          schema:
+            type: integer
+            format: int64
+            example: 1
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SocksRequestDto'
+      responses:
+        '200':
+          description: Данные носков успешно обновлены.
+          content:
+            text/plain:
+              schema:
+                $ref: '#/components/schemas/SocksResponseDto'
+  /api/socks/batch:
+    post:
+      summary: Загрузить партии носков из файла
+      description: Загружает партии носков из файла формата CSV или Excel.
+      operationId: uploadSocksBatch
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+                  description: Файл с партиями носков
+      responses:
+        '200':
+          description: Партии носков успешно загружены.
+          content:
+            text/plain:
+              schema:
+                type: string
+components:
+  schemas:
+    SocksRequestDto:
+      type: object
+      properties:
+        color:
+          type: string
+          description: Цвет носков
+          example: red
+        cottonPart:
+          type: number
+          format: double
+          description: Процент хлопка в носках
+          example: 50
+        quantity:
+          type: integer
+          description: Количество носков в партии
+          example: 100
+    SocksResponseDto:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: "Идентификатор прихода"
+          format: int64
+          example: 123
+        color:
+          type: string
+          description: Цвет носков
+          example: red
+        cottonPart:
+          type: number
+          format: double
+          description: Процент хлопка в носках
+          example: 50
+        quantity:
+          type: integer
+          description: Количество носков в партии
+          example: 100
