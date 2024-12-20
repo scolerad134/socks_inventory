@@ -38,7 +38,20 @@ public class SocksServiceImpl implements SocksService {
     @Override
     public Socks saveSocks(Socks socks) {
         log.debug("saveSocks - start, socks = {}", socks);
-        Socks savedSocks = socksRepository.save(socks);
+
+        Socks savedSocks;
+
+        Optional<Socks> socksOptional = socksRepository.findByColorAndCottonPart(socks.getColor(), socks.getCottonPart());
+
+        if (socksOptional.isPresent()) {
+            Socks existSocks = socksOptional.orElse(null);
+            existSocks.setQuantity(existSocks.getQuantity() + socks.getQuantity());
+            savedSocks = socksRepository.save(existSocks);
+            log.debug("saveSocks - end, with socks = {}", savedSocks);
+            return savedSocks;
+        }
+
+        savedSocks = socksRepository.save(socks);
         log.debug("saveSocks - end, with socks = {}", savedSocks);
         return savedSocks;
     }

@@ -1,8 +1,10 @@
-openapi: 3.0.1
+openapi: 3.0.0
 info:
   title: Socks Inventory API
-  description: API для управления учётом носков на складе
+  description: API для управления носками на складе
   version: 1.0.0
+servers:
+  - url: http://localhost:8080
 paths:
   /api/socks/income:
     post:
