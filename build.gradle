@@ -1,0 +1,86 @@
+plugins {
+	id 'java'
+	id 'org.springframework.boot' version '3.4.0'
+	id 'io.spring.dependency-management' version '1.1.6'
+	id 'org.openapi.generator' version '7.7.0'
+}
+
+group = 'com.socks'
+version = '0.0.1-SNAPSHOT'
+description = 'socks_inventory'
+java {
+	toolchain {
+		languageVersion = JavaLanguageVersion.of(17)
+	}
+}
+
+repositories {
+	mavenCentral()
+}
+
+dependencies {
+	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+	implementation 'org.springframework.boot:spring-boot-starter-validation'
+	implementation 'org.springframework.boot:spring-boot-starter-web'
+
+	runtimeOnly 'org.postgresql:postgresql'
+
+	compileOnly 'org.projectlombok:lombok'
+	annotationProcessor 'org.projectlombok:lombok'
+
+	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+	testImplementation 'org.mockito:mockito-core'
+	testImplementation 'org.mockito:mockito-junit-jupiter'
+	testImplementation 'org.junit.jupiter:junit-jupiter'
+
+	implementation 'org.openapitools:jackson-databind-nullable:0.2.1'
+	implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.3.0'
+
+	implementation 'org.apache.poi:poi-ooxml:5.2.3'
+	implementation 'org.apache.commons:commons-collections4:4.4'
+}
+
+tasks.compileJava {
+	dependsOn tasks.openApiGenerate
+}
+
+
+openApiGenerate {
+	generatorName = "spring"
+	inputSpec = "${projectDir}/src/main/resources/swagger/openAPI.yaml"
+	outputDir = "${buildDir}/generated-sources"
+	apiPackage = "com.socks.openapi.api"
+	modelPackage = "com.socks.openapi.model"
+	configOptions = [
+			java8                 : "true",
+			useJakartaEe          : "true",
+			interfaceOnly         : "true",
+			generateApiTests      : "false",
+			generateApiDocumentation: "false",
+			openApiNullable       : "false"
+	]
+	typeMappings = [
+			OffsetDateTime : "LocalDateTime"
+	]
+	importMappings = [
+			"java.time.OffsetDateTime" : "java.time.LocalDateTime"
+	]
+}
+
+sourceSets {
+	main {
+		java {
+			srcDir "${buildDir}/generated-sources"
+		}
+	}
+}
+
+
+tasks.withType(JavaCompile) {
+	options.encoding = 'UTF-8'
+}
+
+tasks.named('test') {
+	useJUnitPlatform()
+}
+
